@@ -9,7 +9,7 @@ function App() {
   const [error, setError] = useState('');
 
   // Fix: Use the environment variable correctly or fallback to full API URL
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://universal-seo-audit-service.onrender.com/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "https://universal-seo-audit-service.onrender.com";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +24,7 @@ function App() {
       const apiUrl = `${API_BASE_URL}/audit`;
       console.log('Making request to:', apiUrl); // Debug log
       
-      const response = await axios.post(apiUrl, {
+      const response = await await axios.post(`${API_BASE_URL}/api/audit`, { url, options: { maxPages:25, includeImages:true, checkMobile:true } });
         url: url,
         options: {
           maxPages: 25,
