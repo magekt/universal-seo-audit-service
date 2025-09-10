@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    image: your-registry/seo-audit-api-gateway:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CRAWLEE_SERVICE_URL=http://crawlee-service:3001
+      - LIGHTHOUSE_SERVICE_URL=http://lighthouse-service:3002
+      - SEO_SERVICE_URL=http://seo-service:3003
+      - JWT_SECRET=${JWT_SECRET}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # Crawlee Service
+  crawlee-service:
+    image: your-registry/seo-audit-crawlee:latest
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=${REDIS_URL}
+      - MAX_PAGES=25  # Reduced for free tier
+      - CONCURRENCY=1  # Reduced for free tier
+    restart: unless-stopped
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.8'
+
+  # Lighthouse Service
+  lighthouse-service:
+    image: your-registry/seo-audit-lighthouse:latest
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=${REDIS_URL}
+    restart: unless-stopped
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.8'
+
+networks:
+  default:
+    name: seo_audit_prod_network
