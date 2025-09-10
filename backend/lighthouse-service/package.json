@@ -1,24 +1,15 @@
 {
-  "name": "seo-audit-lighthouse-service",
+  "name": "lighthouse-service",
   "version": "1.0.0",
-  "description": "Lighthouse-based performance auditing service",
+  "description": "Lighthouse performance audit service",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo 'Tests not implemented yet'"
+    "dev": "nodemon index.js"
   },
   "dependencies": {
-    "lighthouse": "^11.0.0",
-    "chrome-launcher": "^1.1.0",
     "express": "^4.18.2"
   },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
-  "keywords": ["lighthouse", "performance", "audit", "seo"],
-  "author": "Universal SEO Team",
-  "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
   }

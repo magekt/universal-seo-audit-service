@@ -1,16 +1,16 @@
 {
-  "name": "seo-audit-crawlee-service",
+  "name": "crawlee-service",
   "version": "1.0.0",
-  "description": "Lightweight website crawling service",
-  "main": "index.js",
+  "description": "Web crawling service",
+  "main": "index.js", 
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "cheerio": "^1.0.0-rc.12",
-    "axios": "^1.5.0"
+    "axios": "^1.5.0",
+    "cheerio": "^1.0.0-rc.12"
   },
   "engines": {
     "node": ">=18.0.0"

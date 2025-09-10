@@ -1,24 +1,15 @@
 {
-  "name": "seo-audit-seo-service",
+  "name": "seo-audit-service", 
   "version": "1.0.0",
-  "description": "SEO Analysis Service for Universal SEO Audit",
+  "description": "SEO analysis service",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo 'Tests not implemented yet'"
+    "dev": "nodemon index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cheerio": "^1.0.0-rc.12",
-    "validator": "^13.9.0"
+    "express": "^4.18.2"
   },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
-  "keywords": ["seo", "audit", "analysis", "optimization"],
-  "author": "Universal SEO Team",
-  "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
   }
