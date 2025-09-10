@@ -8,6 +8,7 @@ function App() {
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
 
+  // Fix: Use the environment variable correctly or fallback to full API URL
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://universal-seo-audit-service.onrender.com/api';
 
   const handleSubmit = async (e) => {
@@ -19,8 +20,11 @@ function App() {
     setResults(null);
 
     try {
-      // Correct endpoint: /api/audit (not just /audit)
-      const response = await axios.post(`${API_BASE_URL}/audit`, {
+      // Make sure we're calling the correct endpoint: /api/audit
+      const apiUrl = `${API_BASE_URL}/audit`;
+      console.log('Making request to:', apiUrl); // Debug log
+      
+      const response = await axios.post(apiUrl, {
         url: url,
         options: {
           maxPages: 25,
@@ -42,6 +46,7 @@ function App() {
 
     } catch (error) {
       console.error('API Error:', error); // Debug log
+      console.error('Error response:', error.response); // More debug info
       setError('Failed to start audit: ' + (error.response?.data?.error || error.message));
       setLoading(false);
     }
