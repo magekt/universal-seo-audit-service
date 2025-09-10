@@ -4,20 +4,13 @@ services:
     name: seo-audit-api-gateway
     env: node
     repo: https://github.com/magekt/universal-seo-audit-service
-    buildCommand: cd backend/api-gateway && npm install
+    buildCommand: cd backend/api-gateway && npm ci --only=production
     startCommand: cd backend/api-gateway && npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: seo-audit-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: seo-audit-redis
-          property: connectionString
+      - key: PORT
+        value: "10000"
       - key: CRAWLEE_SERVICE_URL
         value: https://seo-audit-crawlee.onrender.com
       - key: LIGHTHOUSE_SERVICE_URL
@@ -26,88 +19,61 @@ services:
         value: https://seo-audit-seo.onrender.com
     plan: free
     region: oregon
-
-  # Crawlee Service
+  # Crawlee Service (working - keep as is)
   - type: web
     name: seo-audit-crawlee
     env: node
     repo: https://github.com/magekt/universal-seo-audit-service
-    buildCommand: cd backend/crawlee-service && npm install && npx playwright install chromium --with-deps
+    buildCommand: cd backend/crawlee-service && npm ci --only=production
     startCommand: cd backend/crawlee-service && npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: seo-audit-redis
-          property: connectionString
+      - key: PORT
+        value: "10000"
       - key: MAX_PAGES
         value: "25"
       - key: CONCURRENCY
         value: "1"
     plan: free
     region: oregon
-
-  # Lighthouse Service  
+  # Lighthouse Service 
   - type: web
     name: seo-audit-lighthouse
     env: node
     repo: https://github.com/magekt/universal-seo-audit-service
-    buildCommand: cd backend/lighthouse-service && npm install
+    buildCommand: cd backend/lighthouse-service && npm ci --only=production
     startCommand: cd backend/lighthouse-service && npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: seo-audit-redis
-          property: connectionString
+      - key: PORT
+        value: "10000"
     plan: free
     region: oregon
-
   # SEO Audit Service
   - type: web
     name: seo-audit-seo
     env: node
     repo: https://github.com/magekt/universal-seo-audit-service
-    buildCommand: cd backend/seo-audit-service && npm install
+    buildCommand: cd backend/seo-audit-service && npm ci --only=production
     startCommand: cd backend/seo-audit-service && npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: seo-audit-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: seo-audit-redis
-          property: connectionString
+      - key: PORT
+        value: "10000"
     plan: free
     region: oregon
-
   # Frontend
   - type: web
     name: seo-audit-frontend
     env: static
     repo: https://github.com/magekt/universal-seo-audit-service
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: cd frontend && npm ci && npm run build
     staticPublishPath: ./frontend/build
     envVars:
       - key: REACT_APP_API_URL
         value: https://seo-audit-api-gateway.onrender.com/api
     plan: free
     region: oregon
-
-databases:
-  - name: seo-audit-db
-    databaseName: seo_audit_db
-    user: admin
-    plan: free
-
-  - name: seo-audit-redis
-    plan: free
-    maxmemoryPolicy: allkeys-lru
