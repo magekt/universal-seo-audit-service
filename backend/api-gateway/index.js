@@ -37,7 +37,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
 });
-
-app.get('/health', (req,res)=>res.json({status:'healthy',service:'api-gateway',timestamp:new Date().toISOString()}));
-
-app.get('/health', (req,res)=>res.json({status:'healthy',service:'api-gateway',timestamp:new Date().toISOString()}));
