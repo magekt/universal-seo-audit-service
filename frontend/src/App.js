@@ -8,8 +8,8 @@ function App() {
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
 
-  // Fix: Use the environment variable correctly or fallback to full API URL
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "https://universal-seo-audit-service.onrender.com";
+  // Use the correct base URL and include /api prefix in calls
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://universal-seo-audit-service.onrender.com';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,11 +20,10 @@ function App() {
     setResults(null);
 
     try {
-      // Make sure we're calling the correct endpoint: /api/audit
-      const apiUrl = `${API_BASE_URL}/audit`;
-      console.log('Making request to:', apiUrl); // Debug log
-      
-      const response = await await axios.post(`${API_BASE_URL}/api/audit`, { url, options: { maxPages:25, includeImages:true, checkMobile:true } });
+      const postUrl = `${API_BASE_URL}/api/audit`;
+      console.log('Making request to:', postUrl);
+
+      const response = await axios.post(postUrl, {
         url: url,
         options: {
           maxPages: 25,
@@ -33,21 +32,24 @@ function App() {
         }
       });
 
-      console.log('API Response:', response.data); // Debug log
+      console.log('API Response:', response.data);
       const auditId = response.data.auditId;
-      
+
       if (!auditId) {
         throw new Error('No audit ID received from server');
       }
-      
-      // For this simple implementation, show results immediately since API Gateway returns them
-      setResults(response.data);
-      setLoading(false);
 
-    } catch (error) {
-      console.error('API Error:', error); // Debug log
-      console.error('Error response:', error.response); // More debug info
-      setError('Failed to start audit: ' + (error.response?.data?.error || error.message));
+      // Fetch results immediately for simplicity
+      const getUrl = `${API_BASE_URL}/api/audit/${auditId}/results`;
+      console.log('Fetching results from:', getUrl);
+
+      const resultResponse = await axios.get(getUrl);
+      setResults(resultResponse.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('API Error:', err);
+      console.error('Error response:', err.response);
+      setError('Failed to start audit: ' + (err.response?.data?.error || err.message));
       setLoading(false);
     }
   };
@@ -83,14 +85,6 @@ function App() {
           </div>
         )}
 
-        {loading && (
-          <div className="loading-container">
-            <div className="spinner"></div>
-            <p>Running comprehensive SEO audit...</p>
-            <small>This may take 2-5 minutes to complete.</small>
-          </div>
-        )}
-
         {results && (
           <div className="results-container">
             <div className="results-header">
@@ -101,28 +95,32 @@ function App() {
               <div className="metric-card">
                 <h3>Overall Score</h3>
                 <div className="metric-value">
-                  {results.results?.seo?.overallScore || results.results?.seo?.score || 'N/A'}/100
+                  {results.results?.seo?.overallScore ||
+                    results.results?.seo?.score || 'N/A'}/100
                 </div>
               </div>
               
               <div className="metric-card">
                 <h3>Pages Crawled</h3>
                 <div className="metric-value">
-                  {results.results?.crawlee?.pagesFound || results.results?.crawl?.pages || 'N/A'}
+                  {results.results?.crawlee?.pagesFound ||
+                    results.results?.crawl?.pages || 'N/A'}
                 </div>
               </div>
               
               <div className="metric-card">
                 <h3>Performance</h3>
                 <div className="metric-value">
-                  {results.results?.lighthouse?.performanceScore || results.results?.lighthouse?.performance || 'N/A'}/100
+                  {results.results?.lighthouse?.performanceScore ||
+                    results.results?.lighthouse?.performance || 'N/A'}/100
                 </div>
               </div>
               
               <div className="metric-card">
                 <h3>Issues Found</h3>
                 <div className="metric-value">
-                  {results.results?.seo?.criticalIssues || results.results?.seo?.issues || 'N/A'}
+                  {results.results?.seo?.criticalIssues ||
+                    results.results?.seo?.issues || 'N/A'}
                 </div>
               </div>
             </div>
@@ -137,7 +135,7 @@ function App() {
                   </div>
                 ))
               ) : (
-                <p>No specific recommendations available. Check individual service results for more details.</p>
+                <p>No specific recommendations available.</p>
               )}
             </div>
           </div>
