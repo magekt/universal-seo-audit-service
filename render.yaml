@@ -3,8 +3,8 @@ services:
   - type: web
     name: seo-audit-api-gateway
     env: node
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: cd backend/api-gateway && npm install
+    startCommand: cd backend/api-gateway && npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -33,7 +33,7 @@ services:
           name: seo-audit-seo
           property: url
     healthCheckPath: /health
-    plan: free  # Free tier
+    plan: free
     region: oregon
     scaling:
       minInstances: 0
@@ -43,10 +43,8 @@ services:
   - type: web
     name: seo-audit-crawlee
     env: node
-    buildCommand: |
-      npm install
-      npx playwright install chromium
-    startCommand: npm start
+    buildCommand: cd backend/crawlee-service && npm install && npx playwright install chromium
+    startCommand: cd backend/crawlee-service && npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -56,9 +54,9 @@ services:
           name: seo-audit-redis
           property: connectionString
       - key: MAX_PAGES
-        value: "25"  # Free tier limitation
+        value: "25"
       - key: CONCURRENCY
-        value: "1"   # Free tier limitation
+        value: "1"
     healthCheckPath: /health
     plan: free
     region: oregon
@@ -70,10 +68,8 @@ services:
   - type: web
     name: seo-audit-lighthouse
     env: node
-    buildCommand: |
-      npm install
-      npx playwright install chromium
-    startCommand: npm start
+    buildCommand: cd backend/lighthouse-service && npm install
+    startCommand: cd backend/lighthouse-service && npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -89,14 +85,54 @@ services:
       minInstances: 0
       maxInstances: 1
 
+  # SEO Audit Service
+  - type: web
+    name: seo-audit-seo
+    env: node
+    buildCommand: cd backend/seo-audit-service && npm install
+    startCommand: cd backend/seo-audit-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: seo-audit-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: seo-audit-redis
+          property: connectionString
+    healthCheckPath: /health
+    plan: free
+    region: oregon
+    scaling:
+      minInstances: 0
+      maxInstances: 1
+
+  # Frontend
+  - type: web
+    name: seo-audit-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: seo-audit-api-gateway
+          property: url
+    plan: free
+    region: oregon
+
 databases:
   - name: seo-audit-db
     databaseName: seo_audit_db
     user: admin
-    plan: free  # 256MB RAM, 1GB storage
+    plan: free
 
   - name: seo-audit-redis
-    plan: free  # 25MB RAM
+    plan: free
     maxmemoryPolicy: allkeys-lru
 
 envVarGroups:
@@ -105,6 +141,6 @@ envVarGroups:
       - key: JWT_SECRET
         generateValue: true
       - key: RATE_LIMIT_MAX
-        value: "100"  # Free tier rate limiting
+        value: "100"
       - key: AUDIT_TIMEOUT
-        value: "120000"  # 2 minutes timeout for free tier
+        value: "120000"
