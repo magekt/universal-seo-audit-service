@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: seo-audit-api-gateway
+    env: node
+    buildCommand: cd backend/api-gateway && npm install
+    startCommand: cd backend/api-gateway && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CRAWLEE_SERVICE_URL
+        value: https://seo-audit-crawlee.onrender.com
+      - key: LIGHTHOUSE_SERVICE_URL
+        value: https://seo-audit-lighthouse.onrender.com
+      - key: SEO_SERVICE_URL
+        value: https://seo-audit-seo.onrender.com
+    plan: free

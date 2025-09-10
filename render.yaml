@@ -3,6 +3,7 @@ services:
   - type: web
     name: seo-audit-api-gateway
     env: node
+    repo: https://github.com/magekt/universal-seo-audit-service
     buildCommand: cd backend/api-gateway && npm install
     startCommand: cd backend/api-gateway && npm start
     envVars:
@@ -18,32 +19,20 @@ services:
           name: seo-audit-redis
           property: connectionString
       - key: CRAWLEE_SERVICE_URL
-        fromService:
-          type: web
-          name: seo-audit-crawlee
-          property: url
+        value: https://seo-audit-crawlee.onrender.com
       - key: LIGHTHOUSE_SERVICE_URL
-        fromService:
-          type: web
-          name: seo-audit-lighthouse
-          property: url
+        value: https://seo-audit-lighthouse.onrender.com
       - key: SEO_SERVICE_URL
-        fromService:
-          type: web
-          name: seo-audit-seo
-          property: url
-    healthCheckPath: /health
+        value: https://seo-audit-seo.onrender.com
     plan: free
     region: oregon
-    scaling:
-      minInstances: 0
-      maxInstances: 1
 
   # Crawlee Service
   - type: web
     name: seo-audit-crawlee
     env: node
-    buildCommand: cd backend/crawlee-service && npm install && npx playwright install chromium
+    repo: https://github.com/magekt/universal-seo-audit-service
+    buildCommand: cd backend/crawlee-service && npm install && npx playwright install chromium --with-deps
     startCommand: cd backend/crawlee-service && npm start
     envVars:
       - key: NODE_ENV
@@ -57,17 +46,14 @@ services:
         value: "25"
       - key: CONCURRENCY
         value: "1"
-    healthCheckPath: /health
     plan: free
     region: oregon
-    scaling:
-      minInstances: 0
-      maxInstances: 1
 
-  # Lighthouse Service
+  # Lighthouse Service  
   - type: web
     name: seo-audit-lighthouse
     env: node
+    repo: https://github.com/magekt/universal-seo-audit-service
     buildCommand: cd backend/lighthouse-service && npm install
     startCommand: cd backend/lighthouse-service && npm start
     envVars:
@@ -78,17 +64,14 @@ services:
           type: redis
           name: seo-audit-redis
           property: connectionString
-    healthCheckPath: /health
     plan: free
     region: oregon
-    scaling:
-      minInstances: 0
-      maxInstances: 1
 
   # SEO Audit Service
   - type: web
     name: seo-audit-seo
     env: node
+    repo: https://github.com/magekt/universal-seo-audit-service
     buildCommand: cd backend/seo-audit-service && npm install
     startCommand: cd backend/seo-audit-service && npm start
     envVars:
@@ -103,25 +86,19 @@ services:
           type: redis
           name: seo-audit-redis
           property: connectionString
-    healthCheckPath: /health
     plan: free
     region: oregon
-    scaling:
-      minInstances: 0
-      maxInstances: 1
 
   # Frontend
   - type: web
     name: seo-audit-frontend
     env: static
+    repo: https://github.com/magekt/universal-seo-audit-service
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/build
     envVars:
       - key: REACT_APP_API_URL
-        fromService:
-          type: web
-          name: seo-audit-api-gateway
-          property: url
+        value: https://seo-audit-api-gateway.onrender.com/api
     plan: free
     region: oregon
 
@@ -134,13 +111,3 @@ databases:
   - name: seo-audit-redis
     plan: free
     maxmemoryPolicy: allkeys-lru
-
-envVarGroups:
-  - name: common
-    envVars:
-      - key: JWT_SECRET
-        generateValue: true
-      - key: RATE_LIMIT_MAX
-        value: "100"
-      - key: AUDIT_TIMEOUT
-        value: "120000"

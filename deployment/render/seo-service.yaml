@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: seo-audit-seo
+    env: node
+    buildCommand: cd backend/seo-audit-service && npm install
+    startCommand: cd backend/seo-audit-service && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+    plan: free
