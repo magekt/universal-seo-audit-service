@@ -8,7 +8,7 @@ function App() {
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://universal-seo-audit-service.onrender.com/api';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,6 +19,7 @@ function App() {
     setResults(null);
 
     try {
+      // Correct endpoint: /api/audit (not just /audit)
       const response = await axios.post(`${API_BASE_URL}/audit`, {
         url: url,
         options: {
@@ -28,34 +29,19 @@ function App() {
         }
       });
 
+      console.log('API Response:', response.data); // Debug log
       const auditId = response.data.auditId;
       
       if (!auditId) {
         throw new Error('No audit ID received from server');
       }
       
-      // Poll for results
-      const checkResults = async () => {
-        try {
-          const resultResponse = await axios.get(`${API_BASE_URL}/audit/${auditId}/results`);
-          setResults(resultResponse.data);
-          setLoading(false);
-        } catch (error) {
-          if (error.response?.status === 404) {
-            // Still processing, check again in 5 seconds
-            setTimeout(checkResults, 5000);
-          } else {
-            setError('Failed to get audit results: ' + (error.response?.data?.error || error.message));
-            setLoading(false);
-          }
-        }
-      };
-
       // For this simple implementation, show results immediately since API Gateway returns them
       setResults(response.data);
       setLoading(false);
 
     } catch (error) {
+      console.error('API Error:', error); // Debug log
       setError('Failed to start audit: ' + (error.response?.data?.error || error.message));
       setLoading(false);
     }
@@ -66,6 +52,7 @@ function App() {
       <header className="App-header">
         <h1>🚀 Universal SEO Audit Service</h1>
         <p>Free, comprehensive SEO auditing for everyone</p>
+        <p>API URL: {API_BASE_URL}</p>
       </header>
 
       <main className="audit-container">
