@@ -26,3 +26,5 @@ app.listen(PORT, () => {
 });
 
 app.get('/health', (req,res)=>res.json({status:'healthy',service:'lighthouse-service',timestamp:new Date().toISOString()}));
+
+app.get('/health', (req,res)=>res.json({status:'healthy',service:'lighthouse-service',timestamp:new Date().toISOString()}));
