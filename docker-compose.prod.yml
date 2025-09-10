@@ -1,9 +1,10 @@
-version: '3.8'
 
 services:
   # API Gateway
   api-gateway:
-    image: your-registry/seo-audit-api-gateway:latest
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
@@ -28,7 +29,9 @@ services:
 
   # Crawlee Service
   crawlee-service:
-    image: your-registry/seo-audit-crawlee:latest
+    build:
+      context: ./backend/crawlee-service
+      dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
       - REDIS_URL=${REDIS_URL}
@@ -47,7 +50,9 @@ services:
 
   # Lighthouse Service
   lighthouse-service:
-    image: your-registry/seo-audit-lighthouse:latest
+    build:
+      context: ./backend/lighthouse-service
+      dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
       - REDIS_URL=${REDIS_URL}

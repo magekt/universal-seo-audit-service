@@ -8,7 +8,6 @@ function App() {
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
 
-  // Use the correct base URL and include /api prefix in calls
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://universal-seo-audit-service.onrender.com';
 
   const handleSubmit = async (e) => {
@@ -20,10 +19,7 @@ function App() {
     setResults(null);
 
     try {
-      const postUrl = `${API_BASE_URL}/api/audit`;
-      console.log('Making request to:', postUrl);
-
-      const response = await axios.post(postUrl, {
+      const response = await axios.post(`${API_BASE_URL}/api/audit`, {
         url: url,
         options: {
           maxPages: 25,
@@ -33,22 +29,13 @@ function App() {
       });
 
       console.log('API Response:', response.data);
-      const auditId = response.data.auditId;
 
-      if (!auditId) {
-        throw new Error('No audit ID received from server');
-      }
+      // Directly use the results from POST response (no GET /results call)
+      setResults(response.data);
 
-      // Fetch results immediately for simplicity
-      const getUrl = `${API_BASE_URL}/api/audit/${auditId}/results`;
-      console.log('Fetching results from:', getUrl);
-
-      const resultResponse = await axios.get(getUrl);
-      setResults(resultResponse.data);
       setLoading(false);
     } catch (err) {
       console.error('API Error:', err);
-      console.error('Error response:', err.response);
       setError('Failed to start audit: ' + (err.response?.data?.error || err.message));
       setLoading(false);
     }
