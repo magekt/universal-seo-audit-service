@@ -19,7 +19,10 @@ function App() {
     setResults(null);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/audit`, {
+      const postUrl = `${API_BASE_URL}/api/audit`;
+      console.log('Making request to:', postUrl);
+
+      const response = await axios.post(postUrl, {
         url: url,
         options: {
           maxPages: 25,
@@ -30,12 +33,12 @@ function App() {
 
       console.log('API Response:', response.data);
 
-      // Directly use the results from POST response (no GET /results call)
+      // Use results directly from POST response (no separate GET call)
       setResults(response.data);
-
       setLoading(false);
     } catch (err) {
       console.error('API Error:', err);
+      console.error('Error response:', err.response);
       setError('Failed to start audit: ' + (err.response?.data?.error || err.message));
       setLoading(false);
     }
@@ -69,6 +72,14 @@ function App() {
         {error && (
           <div className="error-message">
             ❌ {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className="loading-container">
+            <div className="spinner"></div>
+            <p>Running comprehensive SEO audit...</p>
+            <small>This may take 2-5 minutes to complete.</small>
           </div>
         )}
 
