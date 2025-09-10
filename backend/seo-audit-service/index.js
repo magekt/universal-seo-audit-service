@@ -26,3 +26,5 @@ const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
   console.log(`SEO service running on port ${PORT}`);
 });
+
+app.get('/health', (req,res)=>res.json({status:'healthy',service:'seo-service',timestamp:new Date().toISOString()}));

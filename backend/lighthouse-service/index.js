@@ -24,3 +24,5 @@ const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
   console.log(`Lighthouse service running on port ${PORT}`);
 });
+
+app.get('/health', (req,res)=>res.json({status:'healthy',service:'lighthouse-service',timestamp:new Date().toISOString()}));
