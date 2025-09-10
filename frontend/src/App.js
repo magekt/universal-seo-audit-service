@@ -8,6 +8,8 @@ function App() {
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
 
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!url) return;
@@ -17,7 +19,7 @@ function App() {
     setResults(null);
 
     try {
-      const response = await axios.post('/api/audit', {
+      const response = await axios.post(`${API_BASE_URL}/audit`, {
         url: url,
         options: {
           maxPages: 25,
@@ -28,10 +30,14 @@ function App() {
 
       const auditId = response.data.auditId;
       
+      if (!auditId) {
+        throw new Error('No audit ID received from server');
+      }
+      
       // Poll for results
       const checkResults = async () => {
         try {
-          const resultResponse = await axios.get(`/api/audit/${auditId}/results`);
+          const resultResponse = await axios.get(`${API_BASE_URL}/audit/${auditId}/results`);
           setResults(resultResponse.data);
           setLoading(false);
         } catch (error) {
@@ -39,14 +45,15 @@ function App() {
             // Still processing, check again in 5 seconds
             setTimeout(checkResults, 5000);
           } else {
-            setError('Failed to get audit results');
+            setError('Failed to get audit results: ' + (error.response?.data?.error || error.message));
             setLoading(false);
           }
         }
       };
 
-      // Start checking for results after 30 seconds
-      setTimeout(checkResults, 30000);
+      // For this simple implementation, show results immediately since API Gateway returns them
+      setResults(response.data);
+      setLoading(false);
 
     } catch (error) {
       setError('Failed to start audit: ' + (error.response?.data?.error || error.message));
@@ -61,82 +68,89 @@ function App() {
         <p>Free, comprehensive SEO auditing for everyone</p>
       </header>
 
-      <main className="container">
-        <div className="audit-form">
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Enter website URL (e.g., https://example.com)"
-                required
-                disabled={loading}
-              />
-              <button type="submit" disabled={loading || !url}>
-                {loading ? 'Auditing...' : 'Start Audit'}
-              </button>
-            </div>
-          </form>
+      <main className="audit-container">
+        <form onSubmit={handleSubmit} className="audit-form">
+          <div className="form-group">
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="Enter website URL (e.g., https://example.com)"
+              required
+              disabled={loading}
+            />
+          </div>
+          <button type="submit" disabled={loading || !url}>
+            {loading ? 'Analyzing...' : 'Start SEO Audit'}
+          </button>
+        </form>
 
-          {error && (
-            <div className="error">
-              <p>❌ {error}</p>
-            </div>
-          )}
+        {error && (
+          <div className="error-message">
+            ❌ {error}
+          </div>
+        )}
 
-          {loading && (
-            <div className="loading">
-              <div className="spinner"></div>
-              <p>Running comprehensive SEO audit...</p>
-              <p>This may take 2-5 minutes to complete.</p>
-            </div>
-          )}
+        {loading && (
+          <div className="loading-container">
+            <div className="spinner"></div>
+            <p>Running comprehensive SEO audit...</p>
+            <small>This may take 2-5 minutes to complete.</small>
+          </div>
+        )}
 
-          {results && (
-            <div className="results">
+        {results && (
+          <div className="results-container">
+            <div className="results-header">
               <h2>📊 Audit Results</h2>
-              
-              <div className="summary-cards">
-                <div className="card">
-                  <h3>Overall Score</h3>
-                  <div className="score">{results.results?.seo?.overallScore || 'N/A'}/100</div>
-                </div>
-                
-                <div className="card">
-                  <h3>Pages Crawled</h3>
-                  <div className="score">{results.results?.crawlee?.pagesFound || 'N/A'}</div>
-                </div>
-                
-                <div className="card">
-                  <h3>Performance</h3>
-                  <div className="score">{results.results?.lighthouse?.performanceScore || 'N/A'}/100</div>
-                </div>
-                
-                <div className="card">
-                  <h3>Issues Found</h3>
-                  <div className="score critical">{results.results?.seo?.criticalIssues || 'N/A'}</div>
+            </div>
+            
+            <div className="metrics-grid">
+              <div className="metric-card">
+                <h3>Overall Score</h3>
+                <div className="metric-value">
+                  {results.results?.seo?.overallScore || results.results?.seo?.score || 'N/A'}/100
                 </div>
               </div>
-
-              <div className="detailed-results">
-                <h3>🔍 Key Issues</h3>
-                {results.results?.seo?.recommendations?.slice(0, 5).map((rec, index) => (
-                  <div key={index} className="recommendation">
-                    <h4>{rec.title}</h4>
-                    <p>{rec.description}</p>
-                  </div>
-                ))}
+              
+              <div className="metric-card">
+                <h3>Pages Crawled</h3>
+                <div className="metric-value">
+                  {results.results?.crawlee?.pagesFound || results.results?.crawl?.pages || 'N/A'}
+                </div>
+              </div>
+              
+              <div className="metric-card">
+                <h3>Performance</h3>
+                <div className="metric-value">
+                  {results.results?.lighthouse?.performanceScore || results.results?.lighthouse?.performance || 'N/A'}/100
+                </div>
+              </div>
+              
+              <div className="metric-card">
+                <h3>Issues Found</h3>
+                <div className="metric-value">
+                  {results.results?.seo?.criticalIssues || results.results?.seo?.issues || 'N/A'}
+                </div>
               </div>
             </div>
-          )}
-        </div>
-      </main>
 
-      <footer>
-        <p>Made with ❤️ by the Universal SEO Audit Team</p>
-        <p>Open source and free forever!</p>
-      </footer>
+            <div className="issues-section">
+              <h3>🔍 Key Issues</h3>
+              {results.results?.seo?.recommendations ? (
+                results.results.seo.recommendations.slice(0, 5).map((rec, index) => (
+                  <div key={index} className="issue-item">
+                    <h4>{rec.title || `Issue ${index + 1}`}</h4>
+                    <p>{rec.description || rec}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No specific recommendations available. Check individual service results for more details.</p>
+              )}
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

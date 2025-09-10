@@ -73,6 +73,6 @@ services:
     staticPublishPath: ./frontend/build
     envVars:
       - key: REACT_APP_API_URL
-        value: https://seo-audit-api-gateway.onrender.com/api
+        value: https://universal-seo-audit-service.onrender.com/api
     plan: free
     region: oregon
