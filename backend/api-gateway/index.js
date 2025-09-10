@@ -1,3 +1,4 @@
+require('../shared/utils/validateEnv')();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -12,119 +13,59 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Rate limiting for free tier
+// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === 'production' ? 100 : 1000,
-  message: 'Too many requests from this IP, please try again later.',
+  message: 'Too many requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use('/api/', limiter);
 
-// Health check endpoint
+// Health check
 app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     service: 'api-gateway',
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: process.env.npm_package_version || '1.0.0'
   });
 });
 
-// Service endpoints
+// Proxy targets
 const services = {
-  crawlee: process.env.CRAWLEE_SERVICE_URL || 'http://localhost:3001',
-  lighthouse: process.env.LIGHTHOUSE_SERVICE_URL || 'http://localhost:3002',
-  seo: process.env.SEO_SERVICE_URL || 'http://localhost:3003'
+  crawlee: process.env.CRAWLEE_SERVICE_URL,
+  lighthouse: process.env.LIGHTHOUSE_SERVICE_URL,
+  seo: process.env.SEO_SERVICE_URL
 };
 
-// Simple audit endpoint for testing
+// Routes
+app.use('/api/crawl', createProxyMiddleware({
+  target: services.crawlee,
+  changeOrigin: true
+}));
+
+app.use('/api/lighthouse', createProxyMiddleware({
+  target: services.lighthouse,
+  changeOrigin: true
+}));
+
+app.use('/api/seo', createProxyMiddleware({
+  target: services.seo,
+  changeOrigin: true
+}));
+
+// Orchestrator
 app.post('/api/audit', async (req, res) => {
   const { url, options = {} } = req.body;
-  
   if (!url) {
     return res.status(400).json({ error: 'URL is required' });
   }
-
-  try {
-    const auditId = generateAuditId();
-    
-    res.json({
-      auditId,
-      status: 'started',
-      message: 'SEO audit initiated successfully',
-      estimatedTime: '2-5 minutes',
-      checkStatusUrl: `/api/audit/${auditId}/status`,
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Audit initiation failed:', error);
-    res.status(500).json({ 
-      error: 'Failed to start audit',
-      timestamp: new Date().toISOString()
-    });
-  }
+  const auditId = 'audit_' + Date.now();
+  res.json({ auditId, status: 'started' });
 });
-
-// Status endpoint
-app.get('/api/audit/:auditId/status', (req, res) => {
-  res.json({
-    auditId: req.params.auditId,
-    status: 'processing',
-    progress: 'Crawling website and analyzing content...',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Results endpoint  
-app.get('/api/audit/:auditId/results', (req, res) => {
-  res.json({
-    auditId: req.params.auditId,
-    status: 'completed',
-    results: {
-      crawlee: {
-        pagesFound: 15,
-        issues: ['Missing alt tags', 'Large images']
-      },
-      lighthouse: {
-        performanceScore: 85,
-        coreWebVitals: {
-          lcp: 2.1,
-          fid: 120,
-          cls: 0.15
-        }
-      },
-      seo: {
-        overallScore: 78,
-        criticalIssues: 3,
-        recommendations: [
-          {
-            title: 'Add missing meta descriptions',
-            description: 'Several pages are missing meta descriptions which impacts search visibility'
-          },
-          {
-            title: 'Optimize image alt tags',
-            description: 'Many images lack descriptive alt text for accessibility and SEO'
-          },
-          {
-            title: 'Improve page load speed',
-            description: 'Large images and unoptimized resources are slowing down the site'
-          }
-        ]
-      }
-    },
-    timestamp: new Date().toISOString()
-  });
-});
-
-function generateAuditId() {
-  return 'audit_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
 
 app.listen(PORT, () => {
-  console.log(`API Gateway running on port ${PORT}`);
+  console.log(\`API Gateway running on port \${PORT}\`);
 });
-
-module.exports = app;
