@@ -1,5 +1,4 @@
 services:
-  # API Gateway
   - type: web
     name: seo-audit-api-gateway
     env: node
@@ -19,7 +18,7 @@ services:
         value: https://seo-audit-seo.onrender.com
     plan: free
     region: oregon
-  # Crawlee Service (working - keep as is)
+
   - type: web
     name: seo-audit-crawlee
     env: node
@@ -37,7 +36,7 @@ services:
         value: "1"
     plan: free
     region: oregon
-  # Lighthouse Service 
+
   - type: web
     name: seo-audit-lighthouse
     env: node
@@ -51,7 +50,7 @@ services:
         value: "10000"
     plan: free
     region: oregon
-  # SEO Audit Service
+
   - type: web
     name: seo-audit-seo
     env: node
@@ -65,7 +64,7 @@ services:
         value: "10000"
     plan: free
     region: oregon
-  # Frontend
+
   - type: web
     name: seo-audit-frontend
     env: static
