@@ -1,7 +1,7 @@
 {
   "name": "seo-audit-crawlee-service",
   "version": "1.0.0",
-  "description": "Website crawling service",
+  "description": "Modern website crawling service with JavaScript support",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "express": "^4.18.2",
-    "cheerio": "^1.0.0-rc.12",
-    "axios": "^1.4.0"
+    "puppeteer": "^21.5.0",
+    "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": ["crawler", "seo", "web-scraping"],
+  "keywords": ["crawler", "seo", "javascript", "spa", "puppeteer"],
   "author": "Universal SEO Team",
   "license": "MIT",
   "engines": {
