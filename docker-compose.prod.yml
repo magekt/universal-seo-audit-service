@@ -1,5 +1,4 @@
 services:
-  # API Gateway
   api-gateway:
     build:
       context: ./backend/api-gateway
@@ -8,25 +7,13 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=${REDIS_URL}
       - CRAWLEE_SERVICE_URL=http://crawlee-service:3001
       - LIGHTHOUSE_SERVICE_URL=http://lighthouse-service:3002
       - SEO_SERVICE_URL=http://seo-service:3003
-      - JWT_SECRET=${JWT_SECRET}
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
+    networks:
+      - seo_network
 
-  # Crawlee Service
   crawlee-service:
     build:
       context: ./backend/crawlee-service
@@ -35,21 +22,10 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=production
-      - REDIS_URL=${REDIS_URL}
-      - MAX_PAGES=34
-      - CONCURRENCY=3
     restart: unless-stopped
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - seccomp:unconfined
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.8'
+    networks:
+      - seo_network
 
-  # Lighthouse Service
   lighthouse-service:
     build:
       context: ./backend/lighthouse-service
@@ -58,19 +34,10 @@ services:
       - "3002:3002"
     environment:
       - NODE_ENV=production
-      - REDIS_URL=${REDIS_URL}
     restart: unless-stopped
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - seccomp:unconfined
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.8'
+    networks:
+      - seo_network
 
-  # SEO Service
   seo-service:
     build:
       context: ./backend/seo-audit-service
@@ -79,14 +46,10 @@ services:
       - "3003:3003"
     environment:
       - NODE_ENV=production
-      - REDIS_URL=${REDIS_URL}
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
+    networks:
+      - seo_network
 
 networks:
-  default:
-    name: seo_audit_prod_network
+  seo_network:
+    driver: bridge
