@@ -18,9 +18,9 @@ app.post('/api/audit', async (req, res) => {
 
   try {
     const [crawlRes, lighthouseRes, seoRes] = await Promise.all([
-      axios.post(`${process.env.CRAWLEE_SERVICE_URL || 'http://localhost:3001'}/crawl`, { url }),
-      axios.post(`${process.env.LIGHTHOUSE_SERVICE_URL || 'http://localhost:3002'}/audit`, { url }),
-      axios.post(`${process.env.SEO_SERVICE_URL || 'http://localhost:3003'}/analyze`, { url })
+      axios.post('http://crawlee-service:3001/crawl', { url }),
+      axios.post('http://lighthouse-service:3002/audit', { url }),
+      axios.post('http://seo-service:3003/analyze', { url })
     ]);
 
     const results = {
@@ -36,4 +36,4 @@ app.post('/api/audit', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`API Gateway running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`API Gateway running on port ${PORT}`));

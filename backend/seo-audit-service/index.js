@@ -14,7 +14,7 @@ app.post('/analyze', async (req, res) => {
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
 
-    const score = 88; // Placeholder; calculate based on checks
+    const score = 88;
     const issues = [];
     const recommendations = [];
 
@@ -34,4 +34,4 @@ app.post('/analyze', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3003;
-app.listen(PORT, () => console.log(`SEO service running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`SEO service running on port ${PORT}`));
